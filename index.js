@@ -27,23 +27,31 @@ app.post('/start', (request, response) => {
 
   // Response data
   const data = {
-    color: '#DFFF00',
+    color: '#000000',
   }
 
   return response.json(data)
 })
+
+
+
+
 
 // Handle POST request to '/move'
 app.post('/move', (request, response) => {
   // NOTE: Do something here to generate your move
-
+console.log(request.body.you);
   // Response data
   const data = {
-    move: 'up', // one of: ['up','down','left','right']
+    move: 'right', // one of: ['up','down','left','right']
   }
+
 
   return response.json(data)
 })
+
+
+
 
 app.post('/end', (request, response) => {
   // NOTE: Any cleanup when a game is complete.
