@@ -1,3 +1,4 @@
+const moves = require('./app/main')
 const bodyParser = require('body-parser')
 const express = require('express')
 const logger = require('morgan')
@@ -34,18 +35,12 @@ app.post('/start', (request, response) => {
 })
 
 
-
-
-
 // Handle POST request to '/move'
 app.post('/move', (request, response) => {
   // NOTE: Do something here to generate your move
-console.log(request.body.you);
+//console.log(request.body.you);
   // Response data
-  const data = {
-    move: 'right', // one of: ['up','down','left','right']
-  }
-
+    const data = moves.moves(request.body);
 
   return response.json(data)
 })
