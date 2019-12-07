@@ -1,4 +1,5 @@
 const moves = require('./app/main')
+const log = require('./app/logger')
 const bodyParser = require('body-parser')
 const express = require('express')
 const logger = require('morgan')
@@ -30,7 +31,7 @@ app.post('/start', (request, response) => {
   const data = {
     color: '#000000',
   }
-
+    log.initGameLogs();
   return response.json(data)
 })
 
@@ -50,6 +51,7 @@ app.post('/move', (request, response) => {
 
 app.post('/end', (request, response) => {
   // NOTE: Any cleanup when a game is complete.
+    log.writeLogs(request.body);
   return response.json({})
 })
 
