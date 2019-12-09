@@ -15,7 +15,7 @@ const moves = (nice) => {
     if(nice.you.health>=20) {
         const whichSnake = huntWhichSnake(nice.you, nice.board);
         if(!!whichSnake) {
-            huntSnake(nice.you, whichSnake, data);
+            huntSnake(nice.you, whichSnake, data,board);
         } else {
             const whichFood = eatWhichFood(nice.you, nice.board);
             eatFood(nice.you,whichFood,data,board);
@@ -140,7 +140,7 @@ const eatFood = (you, whichFood, data,board) => {
     if( whereY < whichFood.y && (board[whereX][whereY+1] !== "H" || board[whereX][whereY+1] !== "S" || board[whereX][whereY+1] !== "Y")) {
         data.scoreD+=10;
     }
-    if( whereY > whichFood.y && (board[whereX][whereY] !== "H" || board[whereX][whereY-1] !== "S" || board[whereX][whereY-1] !== "Y")) {
+    if( whereY > whichFood.y && (board[whereX][whereY-1] !== "H" || board[whereX][whereY-1] !== "S" || board[whereX][whereY-1] !== "Y")) {
         data.scoreU+=10;
     }
 };
@@ -164,19 +164,19 @@ const huntWhichSnake = (you,board) => {
     return whichSnake;
 };
 
-const huntSnake = (you, whichSnake, data) => {
+const huntSnake = (you, whichSnake, data, board) => {
     let whereX = you.body[0].x;
     let whereY = you.body[0].y;
-    if( whereX< whichSnake.x) {
+    if( whereX < whichSnake.x && (board[whereX+1][whereY] !== "H" || board[whereX+1][whereY] !== "S" || board[whereX+1][whereY] !== "Y")) {
         data.scoreR+=10;
     }
-    if( whereX > whichSnake.x) {
+    if( whereX > whichSnake.x && (board[whereX-1][whereY] !== "H" || board[whereX-1][whereY] !== "S" || board[whereX-1][whereY] !== "Y")) {
         data.scoreL+=10;
     }
-    if( whereY< whichSnake.y) {
+    if( whereY < whichSnake.y && (board[whereX][whereY+1] !== "H" || board[whereX][whereY+1] !== "S" || board[whereX][whereY+1] !== "Y")) {
         data.scoreD+=10;
     }
-    if( whereY> whichSnake.y) {
+    if( whereY > whichSnake.y && (board[whereX][whereY=1] !== "H" || board[whereX][whereY-1] !== "S" || board[whereX][whereY-1] !== "Y")) {
         data.scoreU+=10;
     }
 };

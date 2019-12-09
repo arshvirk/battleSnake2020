@@ -18,7 +18,11 @@ const getBoard = (big) => {
             for (let j = 0; j < big.board.snakes[i].body.length; j++) {
                 if (big.board.snakes[i].body[j]) {
                     if(j === 0){
-                        Myboard[big.board.snakes[i].body[j].x][big.board.snakes[i].body[j].y] = "H"
+                        if(big.board.snakes[i].body.length < big.you.body.length){
+                            Myboard[big.board.snakes[i].body[j].x][big.board.snakes[i].body[j].y] = "A"
+                        } else {
+                            Myboard[big.board.snakes[i].body[j].x][big.board.snakes[i].body[j].y] = "H"
+                        }
                     } else {
                         Myboard[big.board.snakes[i].body[j].x][big.board.snakes[i].body[j].y] = "S"
                     }
