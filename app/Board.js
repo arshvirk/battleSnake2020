@@ -24,7 +24,11 @@ const getBoard = (big) => {
                             Myboard[big.board.snakes[i].body[j].x][big.board.snakes[i].body[j].y] = "H"
                         }
                     } else {
-                        Myboard[big.board.snakes[i].body[j].x][big.board.snakes[i].body[j].y] = "S"
+                        if (j === big.board.snakes[i].body.length-1) {
+                            Myboard[big.board.snakes[i].body[j].x][big.board.snakes[i].body[j].y] = "T"
+                        } else {
+                            Myboard[big.board.snakes[i].body[j].x][big.board.snakes[i].body[j].y] = "S"
+                        }
                     }
                 }
             }

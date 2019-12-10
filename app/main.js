@@ -11,7 +11,7 @@ const moves = (nice) => {
         move: 'left', // one of: ['up','down','left','right']
     };
     data.move = wallStuff(nice, data,board).move;
-
+   // console.log(data);
     if(nice.you.health>=20) {
         const whichSnake = huntWhichSnake(nice.you, nice.board);
         if(!!whichSnake) {
@@ -24,22 +24,239 @@ const moves = (nice) => {
         const whichFood = eatWhichFood(nice.you, nice.board);
         eatFood(nice.you,whichFood,data,board);
     }
-
     const arr = [data.scoreU, data.scoreD, data.scoreL, data.scoreR];
     data.move = whichMove(arr,nice.you,board).move;
-    let whatNextX= whichMove(arr,nice.you,board).x;
-    let whatNextY= whichMove(arr,nice.you,board).y;
-    inNextSurrounding(nice.you,board,data,nice.you.body[0].x+whatNextX, nice.you.body[0].y+whatNextY,data.move);
+   // console.log(data);
+    inSurrounding(nice.you,board,data,nice.you.body[0].x, nice.you.body[0].y);
 
     const StarnewArr = [data.scoreU, data.scoreD, data.scoreL, data.scoreR];
     data.move = whichMove(StarnewArr,nice.you,board).move;
-
-    inSurrounding(nice.you,board,data,nice.you.body[0].x, nice.you.body[0].y);
-
+   // console.log(data);
+   // console.log(whichMove(StarnewArr,nice.you,board));
+    let whatNextX= whichMove(StarnewArr,nice.you,board).x;
+    let whatNextY= whichMove(StarnewArr,nice.you,board).y;
+    inNextSurrounding(nice.you,board,data,nice.you.body[0].x+whatNextX, nice.you.body[0].y+whatNextY,data.move);
     const newArr = [data.scoreU, data.scoreD, data.scoreL, data.scoreR];
     data.move = whichMove(newArr,nice.you,board).move;
+  //  console.log(data);
 
+     openSpaceCheck(nice, data, board,nice.you.body[0].x, nice.you.body[0].y);
+    const last = [data.scoreU, data.scoreD, data.scoreL, data.scoreR];
+    data.move = whichMove(last,nice.you,board).move;
+  //  console.log(data);
     return data;
+};
+
+whichGood = (arr, data) => {
+    const U = data.scoreU;
+    const D = data.scoreD;
+    const L = data.scoreL;
+    const R = data.scoreR;
+    let initialData = {
+        scoreU: U,
+        scoreD: D,
+        scoreL: L,
+        scoreR: R
+    };
+    let min = arr[0];
+    data.scoreU += 300;
+    let flag1 = false;
+    let flag2 = false;
+    if(arr[1] <= min) {
+        if (arr[1] === min && initialData.scoreD < initialData.scoreU) {
+
+        } else {
+            min = arr[1];
+            data.scoreD += 300;
+            data.scoreU += -300;
+            flag1 = true;
+        }
+    }
+    if(arr[2] <= min) {
+        if(arr[2] ===  min) {
+            if(flag1 && initialData.scoreL < initialData.scoreD) {
+
+            } else {
+                min = arr[2];
+                data.scoreL += 300;
+                data.scoreU += -300;
+                flag2 = true;
+            }
+        } else {
+            min = arr[2];
+            data.scoreL += 300;
+            if (flag1) {
+                data.scoreD += -300;
+            } else {
+                data.scoreU += -300;
+            }
+            flag2 = true;
+        }
+    }
+    if(arr[3] <= min) {
+        if(arr[3] ===  min) {
+            if(flag1) {
+                if(initialData.scoreR < initialData.scoreD) {
+
+                } else {
+                    min = arr[3];
+                    data.scoreR += 300;
+                    data.scoreD += -300;
+                }
+            } else if (flag2) {
+                if(data.scoreR < data.scoreL) {
+
+                } else {
+                    min = arr[3];
+                    data.scoreR += 300;
+                    data.scoreL += -300;
+                }
+            }  else {
+                min = arr[3];
+                data.scoreR += 300;
+                data.scoreU += -300;
+            }
+        } else {
+            min = arr[3];
+            data.scoreR += 300;
+            if (flag2) {
+                data.scoreL += -300;
+            } if(flag1){
+                data.scoreD += -300;
+            } else {
+                data.scoreU += -300;
+            }
+        }
+    }
+return data;
+};
+// handle for thee case where a spot is empty next to the wall and 2 snakes are on the other sides.
+const openSpaceCheck = (nice, data, board, whereX, whereY) => {
+    let openScoreU=0;
+    let openScoreD=0;
+    let openScoreL=0;
+    let openScoreR=0;
+   // console.log("whrere X:  "+ whereX+ "whereUY:   "+whereY);
+    if(whereX-1 >= 0 && (board[whereX-1][whereY] === " " || board[whereX-1][whereY] === "F" || board[whereX-1][whereY] === "A" || board[whereX-1][whereY] === "T")) {
+    //    console.log("whrere X: #########   ########  ########  ######  "+ (whereX-1)+ "     whereUY:   "+whereY);
+       openScoreL =  pointNewScore(nice.you, board, (whereX-1), whereY);
+    //   console.log(openScoreL);
+    } else {
+        openScoreL = 30000;
+    }
+    if(whereX+1 <= board.length-1 && (board[whereX+1][whereY] === " " || board[whereX+1][whereY] === "F" || board[whereX+1][whereY] === "A" || board[whereX+1][whereY] === "T")) {
+    //    console.log("whrere X: #########   ########  ########  ######  "+ (whereX+1)+ "        whereUY:   "+whereY);
+       openScoreR = pointNewScore(nice.you, board, (whereX+1), whereY);
+     //   console.log(openScoreR);
+    } else {
+        openScoreR= 30000;
+    }
+    if(whereY-1 >= 0 && (board[whereX][whereY-1] === " " || board[whereX][whereY-1] === "F" || board[whereX][whereY-1] === "A" || board[whereX][whereY-1] === "T")) {
+     //   console.log("whrere X: #########   ########  ########  ######  "+ (whereX)+ "       whereUY:   "+(whereY-1));
+      openScoreU = pointNewScore(nice.you, board, whereX, (whereY-1));
+      //  console.log(openScoreU);
+    } else {
+        openScoreU = 30000;
+    }
+    if(whereY+1 <= board.length-1  && (board[whereX][whereY+1] === " " || board[whereX][whereY+1] === "F" || board[whereX][whereY+1] === "A" || board[whereX][whereY+1] === "T")) {
+     //   console.log("whrere X: #########   ########  ########  ######  "+ (whereX)+ "      whereUY:   "+(whereY+1));
+      openScoreD = pointNewScore(nice.you, board, whereX, (whereY+1));
+      //  console.log(openScoreD);
+    } else {
+        openScoreD = 30000;
+    }
+    const arr = [openScoreU,openScoreD,openScoreL,openScoreR];
+   // console.log("answer");
+  //  console.log(whichGood(arr,data));
+    return whichGood(arr,data);
+};
+const pointNewScore = (you, board,whereX, whereY) => {
+    let score = 0;
+    if(whereX-1 >= 0) {
+        if((board[whereX-1][whereY] === " " || board[whereX-1][whereY] === "F" || board[whereX-1][whereY] === "A" || board[whereX-1][whereY] === "T")) {
+            score += -2100
+        } else {
+       //     console.log("next left: " + (whereX - 1) + "next right: " + whereY);
+            if (board[whereX - 1][whereY] === "H" || board[whereX - 1][whereY] === "S") {
+                if (board[whereX - 1][whereY] === "S") {
+                    score += 1000;
+                } else {
+                    score += 2000;
+                }
+        //        console.log("score:    " + score);
+            } else if (board[whereX - 1][whereY] === "Y" || board[whereX - 1][whereY] === "X") {
+                score += 1000;
+            }
+        //    console.log("score:    " + score);
+        }
+    } else {
+        score += 7000;
+      //  console.log("score:    "+score);
+    }
+    if(whereX+1 <= board.length-1) {
+        if( (board[whereX+1][whereY] === " " || board[whereX+1][whereY] === "F" || board[whereX+1][whereY] === "A" || board[whereX+1][whereY] === "T")) {
+            score += -2100;
+        } else {
+        //    console.log("next left: " + (whereX + 1) + "next right: " + whereY);
+            if (board[whereX + 1][whereY] === "H" || board[whereX + 1][whereY] === "S") {
+                if (board[whereX + 1][whereY] === "S") {
+                    score += 1000;
+                } else {
+                    score += 2000;
+                }
+        //        console.log("score:    " + score);
+            } else if (board[whereX + 1][whereY] === "Y" || board[whereX + 1][whereY] === "X") {
+                score += 1000;
+         //       console.log("score:    " + score);
+            }
+        }
+    } else {
+        score += 7000;
+       // console.log("score:    "+score);
+    }
+    if(whereY-1 >= 0) {
+        if((board[whereX][whereY-1] === " " || board[whereX][whereY-1] === "F" || board[whereX][whereY-1] === "A" || board[whereX][whereY-1] === "T")) {
+            score += -2100
+        } else {
+       //     console.log("next left: " + whereX + "next right: " + (whereY - 1));
+            if (board[whereX][whereY - 1] === "H" || board[whereX][whereY - 1] === "S") {
+                if (board[whereX][whereY - 1] === "S") {
+                    score += 1000;
+                } else {
+                    score += 2000;
+                }
+          //      console.log("score:    " + score);
+            } else if (board[whereX][whereY - 1] === "Y" || board[whereX][whereY - 1] === "X") {
+                score += 1000;
+           //     console.log("score:    " + score);
+            }
+        }
+    } else {
+        score += 7000;
+     //   console.log("score:    "+score);
+    }
+    if(whereY+1 <= board.length-1) {
+        if (board[whereX][whereY+1] === " " || board[whereX][whereY+1] === "F" || board[whereX][whereY+1] === "A" || board[whereX][whereY+1] === "T") {
+            score += -2100;
+        } else {
+        //    console.log("next left: " + whereX + "next right: " + (whereY + 1));
+            if (board[whereX][whereY + 1] === "H" || board[whereX][whereY + 1] === "S") {
+                if (board[whereX][whereY + 1] === "S") {
+                    score += 1000;
+                } else {
+                    score += 2000;
+                }
+            //    console.log("score:    " + score);
+            } else if (board[whereX][whereY + 1] === "Y" || board[whereX][whereY + 1] === "X") {
+                score += 1000;
+            //    console.log("score:    " + score);
+            }
+        }
+    } else {
+        score += 7000;
+     //   console.log("score:    "+score);
+    }
+    return score;
 };
 
 const wallStuff = (nice, data,board) => {
@@ -374,170 +591,54 @@ const inSurrounding = (you, board, data, whereX, whereY) => {
 const inNextSurrounding = (you, board, data, whereX, whereY, originalMove) => {
     switch (originalMove) {
         case "up":
-            caseUp(board, data, whereX, whereY);
+            caseWhich(board, data, whereX, whereY, data.scoreU, data.scoreD);
             break;
         case "down":
-            caseDown(board, data, whereX, whereY);
+            caseWhich(board, data, whereX, whereY, data.scoreD, data.scoreU);
             break;
         case "left":
-            caseLeft(board, data, whereX, whereY);
+            caseWhich(board, data, whereX, whereY, data.scoreL, data.scoreR);
             break;
         case "right":
-            caseRight(board, data, whereX, whereY);
+            caseWhich(board, data, whereX, whereY, data.scoreR, data.scoreL);
     }
 };
 
-
-const caseUp = (board,data, whereX, whereY) => {
+const caseWhich = (board,data, whereX, whereY, scoreA, scoreB) => {
     if(whereX-1 >= 0) {
         if(board[whereX-1][whereY] === "H"){
-            data.scoreU += -200;
-            data.scoreD += 20;
+            scoreA += -200;
+            scoreB += 20;
         } else if(board[whereX-1][whereY] === "S"){
-            data.scoreU += -300;
-            data.scoreD += 30;
+            scoreA += -300;
+            scoreB += 30;
         }
     }
     if(whereX+1 <= board.length-1) {
         if(board[whereX+1][whereY] === "H"){
-            data.scoreU += -200;
-            data.scoreD += 20;
+            scoreA += -200;
+            scoreB += 20;
         } else if(board[whereX+1][whereY] === "S"){
-            data.scoreU += -300;
-            data.scoreD += 30;
+            scoreA += -300;
+            scoreB += 30;
         }
     }
     if(whereY-1 >= 0) {
         if(board[whereX][whereY-1] === "H"){
-            data.scoreU += -200;
-            data.scoreD += 20;
+            scoreA += -200;
+            scoreB += 20;
         } else if(board[whereX][whereY-1] === "S"){
-            data.scoreU += -300;
-            data.scoreD += 30;
+            scoreA += -300;
+            scoreB += 30;
         }
     }
     if(whereY+1 <= board.length-1) {
         if(board[whereX][whereY+1] === "H"){
-            data.scoreU += -200;
-            data.scoreD += 20;
+            scoreA += -200;
+            scoreB += 20;
         } else if(board[whereX][whereY+1] === "S"){
-            data.scoreU += -300;
-            data.scoreD += 30;
-        }
-    }
-};
-
-const caseDown = (board, data, whereX, whereY) => {
-    if(whereX-1 >= 0) {
-        if(board[whereX-1][whereY] === "H"){
-            data.scoreD += -200;
-            data.scoreU += 20;
-        } else if(board[whereX-1][whereY] === "S"){
-            data.scoreD += -300;
-            data.scoreU += 30;
-        }
-    }
-    if(whereX+1 <= board.length-1) {
-        if(board[whereX+1][whereY] === "H"){
-            data.scoreD += -200;
-            data.scoreU += 20;
-        } else if(board[whereX+1][whereY] === "S"){
-            data.scoreD += -300;
-            data.scoreU += 30;
-        }
-    }
-    if(whereY-1 >= 0) {
-        if(board[whereX][whereY-1] === "H"){
-            data.scoreD += -200;
-            data.scoreU += 20;
-        } else if(board[whereX][whereY-1] === "S"){
-            data.scoreD += -300;
-            data.scoreU += 30;
-        }
-    }
-    if(whereY+1 <= board.length-1) {
-        if(board[whereX][whereY+1] === "H"){
-            data.scoreD += -200;
-            data.scoreU += 20;
-        } else if(board[whereX][whereY+1] === "S"){
-            data.scoreD += -300;
-            data.scoreU += 30;
-        }
-    }
-};
-const caseLeft = (board, data, whereX, whereY) => {
-    if(whereX-1 >= 0) {
-        if(board[whereX-1][whereY] === "H"){
-            data.scoreL += -200;
-            data.scoreR += 20;
-        } else if(board[whereX-1][whereY] === "S"){
-            data.scoreL += -300;
-            data.scoreR += 30;
-        }
-    }
-    if(whereX+1 <= board.length-1) {
-        if(board[whereX+1][whereY] === "H"){
-            data.scoreL += -200;
-            data.scoreR += 20;
-        } else if(board[whereX+1][whereY] === "S"){
-            data.scoreL += -300;
-            data.scoreR += 30;
-        }
-    }
-    if(whereY-1 >= 0) {
-        if(board[whereX][whereY-1] === "H"){
-            data.scoreL += -200;
-            data.scoreR += 20;
-        } else if(board[whereX][whereY-1] === "S"){
-            data.scoreL += -300;
-            data.scoreR += 30;
-        }
-    }
-    if(whereY+1 <= board.length-1) {
-        if(board[whereX][whereY+1] === "H"){
-            data.scoreL += -200;
-            data.scoreR += 20;
-        } else if(board[whereX][whereY+1] === "S"){
-            data.scoreL += -300;
-            data.scoreR += 30;
-        }
-    }
-};
-const caseRight = (board, data, whereX, whereY) => {
-    if(whereX-1 >= 0) {
-        if(board[whereX-1][whereY] === "H"){
-            data.scoreR += -200;
-            data.scoreL += 20;
-        } else if(board[whereX-1][whereY] === "S"){
-            data.scoreR += -300;
-            data.scoreL += 30;
-        }
-    }
-    if(whereX+1 <= board.length-1) {
-        if(board[whereX+1][whereY] === "H"){
-            data.scoreR += -200;
-            data.scoreL += 20;
-        } else if(board[whereX+1][whereY] === "S"){
-            data.scoreR += -300;
-            data.scoreL += 30;
-        }
-    }
-    if(whereY-1 >= 0) {
-        if(board[whereX][whereY-1] === "H"){
-            data.scoreR += -200;
-            data.scoreL += 20;
-        } else if(board[whereX][whereY-1] === "S"){
-            data.scoreR += -300;
-            data.scoreL += 30;
-        }
-    }
-    if(whereY+1 <= board.length-1) {
-        if(board[whereX][whereY+1] === "H"){
-            data.scoreR += -200;
-            data.scoreL += 20;
-        } else if(board[whereX][whereY+1] === "S"){
-            data.scoreR+= -300;
-            data.scoreL += 30;
+            scoreA += -300;
+            scoreB += 30;
         }
     }
 };
