@@ -11,7 +11,7 @@ const moves = (nice) => {
         move: 'left', // one of: ['up','down','left','right']
     };
     data.move = wallStuff(nice, data,board).move;
-   // console.log(data);
+    //console.log(data);
     if(nice.you.health>=20) {
         const whichSnake = huntWhichSnake(nice.you, nice.board);
         if(!!whichSnake) {
@@ -26,25 +26,50 @@ const moves = (nice) => {
     }
     const arr = [data.scoreU, data.scoreD, data.scoreL, data.scoreR];
     data.move = whichMove(arr,nice.you,board).move;
-   // console.log(data);
+   //console.log(data);
     inSurrounding(nice.you,board,data,nice.you.body[0].x, nice.you.body[0].y);
 
     const StarnewArr = [data.scoreU, data.scoreD, data.scoreL, data.scoreR];
     data.move = whichMove(StarnewArr,nice.you,board).move;
-   // console.log(data);
+    //console.log(data);
    // console.log(whichMove(StarnewArr,nice.you,board));
     let whatNextX= whichMove(StarnewArr,nice.you,board).x;
     let whatNextY= whichMove(StarnewArr,nice.you,board).y;
     inNextSurrounding(nice.you,board,data,nice.you.body[0].x+whatNextX, nice.you.body[0].y+whatNextY,data.move);
     const newArr = [data.scoreU, data.scoreD, data.scoreL, data.scoreR];
     data.move = whichMove(newArr,nice.you,board).move;
-  //  console.log(data);
+   // console.log(data);
 
      openSpaceCheck(nice, data, board,nice.you.body[0].x, nice.you.body[0].y);
     const last = [data.scoreU, data.scoreD, data.scoreL, data.scoreR];
     data.move = whichMove(last,nice.you,board).move;
-  //  console.log(data);
+   // console.log(data);
     return data;
+};
+
+isHeadClose = (board, whereX, whereY, score) => {
+    if(whereX-1 >= 0) {
+        if (board[whereX - 1][whereY] === "H") {
+            score += 7000;
+        }
+    }
+    if(whereX+1 <= board.length-1) {
+        if (board[whereX + 1][whereY] === "H") {
+            score += 7000;
+        }
+    }
+    if(whereY-1 >= 0) {
+        if (board[whereX][whereY - 1] === "H") {
+            score += 7000;
+        }
+    }
+    if(whereY+1 <= board.length-1) {
+        if (board[whereX][whereY+1] === "H") {
+            score += 7000;
+        }
+    }
+    return score;
+
 };
 
 whichGood = (arr, data) => {
@@ -130,7 +155,8 @@ whichGood = (arr, data) => {
     }
 return data;
 };
-// handle for thee case where a spot is empty next to the wall and 2 snakes are on the other sides.
+// handle for thee case where a spot is empty next to the wall and 2 snakes are on the other sides. also when food is next to the wall and no one else is there.// also don't run into wall when there is nothing around
+//if no snakes ate on the board my snake would die of starvation.
 const openSpaceCheck = (nice, data, board, whereX, whereY) => {
     let openScoreU=0;
     let openScoreD=0;
@@ -138,8 +164,13 @@ const openSpaceCheck = (nice, data, board, whereX, whereY) => {
     let openScoreR=0;
    // console.log("whrere X:  "+ whereX+ "whereUY:   "+whereY);
     if(whereX-1 >= 0 && (board[whereX-1][whereY] === " " || board[whereX-1][whereY] === "F" || board[whereX-1][whereY] === "A" || board[whereX-1][whereY] === "T")) {
-    //    console.log("whrere X: #########   ########  ########  ######  "+ (whereX-1)+ "     whereUY:   "+whereY);
+     //   console.log("whrere X: #########   ########  ########  ######  "+ (whereX-1)+ "     whereUY:   "+whereY);
        openScoreL =  pointNewScore(nice.you, board, (whereX-1), whereY);
+        openScoreL = isHeadClose(board,(whereX-1), whereY, openScoreL);
+     //  console.log(openScoreL);
+       if(board[whereX-1][whereY] === "F" && nice.you.health <=20) {
+           openScoreL += -20000;
+       }
     //   console.log(openScoreL);
     } else {
         openScoreL = 30000;
@@ -147,13 +178,24 @@ const openSpaceCheck = (nice, data, board, whereX, whereY) => {
     if(whereX+1 <= board.length-1 && (board[whereX+1][whereY] === " " || board[whereX+1][whereY] === "F" || board[whereX+1][whereY] === "A" || board[whereX+1][whereY] === "T")) {
     //    console.log("whrere X: #########   ########  ########  ######  "+ (whereX+1)+ "        whereUY:   "+whereY);
        openScoreR = pointNewScore(nice.you, board, (whereX+1), whereY);
-     //   console.log(openScoreR);
+        openScoreR = isHeadClose(board,(whereX+1), whereY, openScoreR);
+      //  console.log(openScoreR);
+        if(board[whereX+1][whereY] === "F" && nice.you.health <=20) {
+            openScoreR += -20000;
+        }
+    //    console.log(openScoreR);
     } else {
         openScoreR= 30000;
     }
     if(whereY-1 >= 0 && (board[whereX][whereY-1] === " " || board[whereX][whereY-1] === "F" || board[whereX][whereY-1] === "A" || board[whereX][whereY-1] === "T")) {
-     //   console.log("whrere X: #########   ########  ########  ######  "+ (whereX)+ "       whereUY:   "+(whereY-1));
+   //     console.log("whrere X: #########   ########  ########  ######  "+ (whereX)+ "       whereUY:   "+(whereY-1));
       openScoreU = pointNewScore(nice.you, board, whereX, (whereY-1));
+        openScoreU = isHeadClose(board,whereX, (whereY-1), openScoreU);
+
+      //  console.log(openScoreU);
+        if(board[whereX][whereY-1] === "F" && nice.you.health <=20) {
+            openScoreU += -20000;
+        }
       //  console.log(openScoreU);
     } else {
         openScoreU = 30000;
@@ -161,22 +203,27 @@ const openSpaceCheck = (nice, data, board, whereX, whereY) => {
     if(whereY+1 <= board.length-1  && (board[whereX][whereY+1] === " " || board[whereX][whereY+1] === "F" || board[whereX][whereY+1] === "A" || board[whereX][whereY+1] === "T")) {
      //   console.log("whrere X: #########   ########  ########  ######  "+ (whereX)+ "      whereUY:   "+(whereY+1));
       openScoreD = pointNewScore(nice.you, board, whereX, (whereY+1));
+        openScoreD = isHeadClose(board,whereX, (whereY+1), openScoreD);
+     //   console.log(openScoreD);
+        if(board[whereX][whereY+1] === "F" && nice.you.health <=20) {
+            openScoreD += -20000;
+        }
       //  console.log(openScoreD);
     } else {
         openScoreD = 30000;
     }
     const arr = [openScoreU,openScoreD,openScoreL,openScoreR];
    // console.log("answer");
-  //  console.log(whichGood(arr,data));
+    //console.log(whichGood(arr,data));
     return whichGood(arr,data);
 };
 const pointNewScore = (you, board,whereX, whereY) => {
     let score = 0;
     if(whereX-1 >= 0) {
         if((board[whereX-1][whereY] === " " || board[whereX-1][whereY] === "F" || board[whereX-1][whereY] === "A" || board[whereX-1][whereY] === "T")) {
-            score += -2100
+            score += -2100;
         } else {
-       //     console.log("next left: " + (whereX - 1) + "next right: " + whereY);
+        //    console.log("next left: " + (whereX - 1) + "next right: " + whereY);
             if (board[whereX - 1][whereY] === "H" || board[whereX - 1][whereY] === "S") {
                 if (board[whereX - 1][whereY] === "S") {
                     score += 1000;
@@ -185,50 +232,62 @@ const pointNewScore = (you, board,whereX, whereY) => {
                 }
         //        console.log("score:    " + score);
             } else if (board[whereX - 1][whereY] === "Y" || board[whereX - 1][whereY] === "X") {
-                score += 1000;
+                if( board[whereX - 1][whereY] === "X") {
+                    score += 2000;
+                } else {
+                    score += 1000;
+                }
             }
-        //    console.log("score:    " + score);
+       //     console.log("score:    " + score);
         }
     } else {
         score += 7000;
-      //  console.log("score:    "+score);
+     //   console.log("score:    "+score);
     }
     if(whereX+1 <= board.length-1) {
         if( (board[whereX+1][whereY] === " " || board[whereX+1][whereY] === "F" || board[whereX+1][whereY] === "A" || board[whereX+1][whereY] === "T")) {
             score += -2100;
         } else {
-        //    console.log("next left: " + (whereX + 1) + "next right: " + whereY);
+    //       console.log("next left: " + (whereX + 1) + "next right: " + whereY);
             if (board[whereX + 1][whereY] === "H" || board[whereX + 1][whereY] === "S") {
                 if (board[whereX + 1][whereY] === "S") {
                     score += 1000;
                 } else {
                     score += 2000;
                 }
-        //        console.log("score:    " + score);
+       //         console.log("score:    " + score);
             } else if (board[whereX + 1][whereY] === "Y" || board[whereX + 1][whereY] === "X") {
-                score += 1000;
-         //       console.log("score:    " + score);
+                if(board[whereX + 1][whereY] === "X") {
+                  score += 2000;
+                } else {
+                    score += 1000;
+                }
+      //          console.log("score:    " + score);
             }
         }
     } else {
         score += 7000;
-       // console.log("score:    "+score);
+     //   console.log("score:    "+score);
     }
     if(whereY-1 >= 0) {
         if((board[whereX][whereY-1] === " " || board[whereX][whereY-1] === "F" || board[whereX][whereY-1] === "A" || board[whereX][whereY-1] === "T")) {
             score += -2100
         } else {
-       //     console.log("next left: " + whereX + "next right: " + (whereY - 1));
+      //      console.log("next left: " + whereX + "next right: " + (whereY - 1));
             if (board[whereX][whereY - 1] === "H" || board[whereX][whereY - 1] === "S") {
                 if (board[whereX][whereY - 1] === "S") {
                     score += 1000;
                 } else {
                     score += 2000;
                 }
-          //      console.log("score:    " + score);
+      //          console.log("score:    " + score);
             } else if (board[whereX][whereY - 1] === "Y" || board[whereX][whereY - 1] === "X") {
-                score += 1000;
-           //     console.log("score:    " + score);
+                if(board[whereX][whereY-1] === "X") {
+                    score += 2000;
+                } else {
+                    score += 1000;
+                }
+      //          console.log("score:    " + score);
             }
         }
     } else {
@@ -239,22 +298,26 @@ const pointNewScore = (you, board,whereX, whereY) => {
         if (board[whereX][whereY+1] === " " || board[whereX][whereY+1] === "F" || board[whereX][whereY+1] === "A" || board[whereX][whereY+1] === "T") {
             score += -2100;
         } else {
-        //    console.log("next left: " + whereX + "next right: " + (whereY + 1));
+     //       console.log("next left: " + whereX + "next right: " + (whereY + 1));
             if (board[whereX][whereY + 1] === "H" || board[whereX][whereY + 1] === "S") {
                 if (board[whereX][whereY + 1] === "S") {
                     score += 1000;
                 } else {
                     score += 2000;
                 }
-            //    console.log("score:    " + score);
+      //          console.log("score:    " + score);
             } else if (board[whereX][whereY + 1] === "Y" || board[whereX][whereY + 1] === "X") {
-                score += 1000;
-            //    console.log("score:    " + score);
+                if(board[whereX][whereY+1] === "X") {
+                    score += 2000;
+                } else {
+                    score += 1000;
+                }
+        //       console.log("score:    " + score);
             }
         }
     } else {
         score += 7000;
-     //   console.log("score:    "+score);
+   //     console.log("score:    "+score);
     }
     return score;
 };
