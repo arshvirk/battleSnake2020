@@ -38,7 +38,11 @@ const getBoard = (big) => {
                     if(j === 0){
                         Myboard[big.board.snakes[i].body[j].x][big.board.snakes[i].body[j].y] = "X"
                     } else {
-                        Myboard[big.board.snakes[i].body[j].x][big.board.snakes[i].body[j].y] = "Y"
+                        if(j === big.board.snakes[i].body.length -1){
+                            Myboard[big.board.snakes[i].body[j].x][big.board.snakes[i].body[j].y] = "E"
+                        } else {
+                            Myboard[big.board.snakes[i].body[j].x][big.board.snakes[i].body[j].y] = "Y"
+                        }
                     }
                 }
             }

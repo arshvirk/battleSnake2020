@@ -29,7 +29,9 @@ app.post('/start', (request, response) => {
 
   // Response data
   const data = {
-    color: '#000000',
+    color: '#ff0000',
+    headType: 'beluga',
+    tailType: 'skinny'
   }
     log.initGameLogs();
   return response.json(data)
@@ -43,7 +45,7 @@ app.post('/move', (request, response) => {
   // Response data
     const data = moves.moves(request.body);
 
-  return response.json(data)
+  return response.json({"move" : data})
 })
 
 
